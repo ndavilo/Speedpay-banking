@@ -17,6 +17,7 @@ class Customer(models.Model):
     def __str__(self):
         return self.email
 
+#one customer can have two account numbers
 class Account(models.Model):
     customer =      models.ForeignKey(Customer, related_name='customer', on_delete=models.CASCADE)
     account_number =models.CharField(max_length=12)
