@@ -26,7 +26,7 @@ class AccountView(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['account_number']
     search_fields = ['account_number']
-    permission_classes = (IsAuthenticated,)
+    #permission_classes = (IsAuthenticated,)
 
 
 class WithdrawView(viewsets.ModelViewSet):
@@ -35,7 +35,7 @@ class WithdrawView(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['amount']
     search_fields = ['amount']
-    permission_classes = (IsAuthenticated,)
+    #permission_classes = (IsAuthenticated,)
 
 
 class DepositView(viewsets.ModelViewSet):
@@ -44,4 +44,6 @@ class DepositView(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['amount']
     search_fields = ['amount']
-    permission_classes = (IsAuthenticated,)
+    #permission_classes = (IsAuthenticated,)
+
+    

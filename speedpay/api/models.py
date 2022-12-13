@@ -19,18 +19,21 @@ class Customer(models.Model):
 
 #one customer can have two account numbers
 class Account(models.Model):
-    customer =      models.ForeignKey(Customer, related_name='customer', on_delete=models.CASCADE)
+    customer =      models.ForeignKey(Customer, related_name='customer', null=True, on_delete=models.CASCADE)
     account_number =models.CharField(max_length=12)
     account_type =  models.CharField(max_length=10)
     amount =        models.FloatField()
+    date =      models.DateTimeField(blank=True, null=True, auto_now_add=True)
     tansaction_key =models.IntegerField()
 
 class Withdraw(models.Model):
     amount =    models.FloatField()
+    date =      models.DateTimeField(blank=True, null=True, auto_now_add=True)
     account =   models.ForeignKey(Account, related_name='withdraw_account', on_delete=models.CASCADE)
 
 class Deposit(models.Model):
     amount =    models.FloatField()
+    date =      models.DateTimeField(blank=True, null=True, auto_now_add=True)
     account =   models.ForeignKey(Account, related_name='deposit_account', on_delete=models.CASCADE)
 
 
