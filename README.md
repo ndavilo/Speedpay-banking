@@ -1,6 +1,8 @@
 # Speedpay-banking
 A Fintech API for Withdraws, Deposit and Balance
 
+This API code allows the frontend access to Customer Account, Withdraw, Deposit and Balance. It also allows new registrations and Token is assigned immidatelly 
+
 Open speedpay file to access the API
 
 You will be allowed to create user using http://127.0.0.1:8000/register
