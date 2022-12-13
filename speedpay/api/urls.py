@@ -5,7 +5,7 @@ from .views import CustomerView, AccountView, WithdrawView, DepositView
 
 router = DefaultRouter()
 router.register('customer', CustomerView)
-router.register('balance', AccountView)
+router.register('account', AccountView)
 router.register('withdraw', WithdrawView)
 router.register('deposit', DepositView)
 

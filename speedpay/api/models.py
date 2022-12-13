@@ -1,6 +1,4 @@
 from django.db import models
-
-
 #to create a token each time a user is created
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -20,7 +18,7 @@ class Customer(models.Model):
         return self.email
 
 class Account(models.Model):
-    customer =      models.ForeignKey(Customer, related_name='customer', null=True, on_delete=models.CASCADE)
+    customer =      models.ForeignKey(Customer, related_name='customer', on_delete=models.CASCADE)
     account_number =models.CharField(max_length=12)
     account_type =  models.CharField(max_length=10)
     amount =        models.FloatField()
