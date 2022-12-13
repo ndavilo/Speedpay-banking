@@ -46,4 +46,5 @@ class DepositView(viewsets.ModelViewSet):
     search_fields = ['amount']
     #permission_classes = (IsAuthenticated,)
 
+
     
