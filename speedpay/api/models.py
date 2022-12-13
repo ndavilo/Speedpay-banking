@@ -15,11 +15,11 @@ class Account(models.Model):
 
 class Withdraw(models.Model):
     amount =    models.FloatField()
-    account =   models.ForeignKey(Account, on_delete=models.CASCADE)
+    account =   models.ForeignKey(Account, related_name='account', on_delete=models.CASCADE)
 
 class Deposit(models.Model):
     amount =    models.FloatField()
-    account =   models.ForeignKey(Account, on_delete=models.CASCADE)
+    account =   models.ForeignKey(Account, related_name='account', on_delete=models.CASCADE)
 
 
 #to create a token each time a user is created
