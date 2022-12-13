@@ -14,3 +14,5 @@ Other fuctions can be performed with the following endpoints
     "withdraw": "http://127.0.0.1:8000/withdraw/",
     "deposit": "http://127.0.0.1:8000/deposit/"
 }
+
+documentation: https://chukwunonsos-organization.gitbook.io/untitled/
