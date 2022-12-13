@@ -7,19 +7,32 @@ from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from django.conf import settings
 
+class Customer(models.Model):
+    first_name      = models.CharField(max_length=100)
+    middle_name     = models.CharField(max_length=100, null=True, blank=True)
+    last_name       = models.CharField(max_length=100)
+    phone_number    = models.CharField(max_length=15)
+    email           = models.EmailField()
+    address         = models.CharField(max_length=200)
+    photo           = models.ImageField(null=True, blank=True)
+
+    def __str__(self):
+        return self.email
+
 class Account(models.Model):
-    client =        models.CharField(max_length=12)
+    customer =      models.ForeignKey(Customer, related_name='customer', null=True, on_delete=models.CASCADE)
+    account_number =models.CharField(max_length=12)
     account_type =  models.CharField(max_length=10)
     amount =        models.FloatField()
-    tansaction_key =models.IntegerField(max_length=4)
+    tansaction_key =models.IntegerField()
 
 class Withdraw(models.Model):
     amount =    models.FloatField()
-    account =   models.ForeignKey(Account, related_name='account', on_delete=models.CASCADE)
+    account =   models.ForeignKey(Account, related_name='withdraw_account', on_delete=models.CASCADE)
 
 class Deposit(models.Model):
     amount =    models.FloatField()
-    account =   models.ForeignKey(Account, related_name='account', on_delete=models.CASCADE)
+    account =   models.ForeignKey(Account, related_name='deposit_account', on_delete=models.CASCADE)
 
 
 #to create a token each time a user is created
