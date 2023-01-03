@@ -5,6 +5,13 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.models import User
+from urllib import request
+
+
+def sample_view(request):
+    current_user = request.user
+    print (current_user.id)
+
 
 #Class based view to register user
 class RegisterUserAPIView(viewsets.ModelViewSet):

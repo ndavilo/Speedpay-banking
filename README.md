@@ -16,3 +16,8 @@ Other fuctions can be performed with the following endpoints
 }
 
 documentation: https://chukwunonsos-organization.gitbook.io/untitled/
+
+Yet to be implimented:
+1. Account number should be unique
+2. Account balancing after each withdrawal and deposit (which can be done on the frontend)
+3. End of day / monthly account balancing 
