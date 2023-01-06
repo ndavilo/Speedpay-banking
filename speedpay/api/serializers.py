@@ -1,4 +1,4 @@
-from .models import Customer, Account, Withdraw, Deposit 
+from .models import Customer, Account, Withdraw, Deposit, Transfer
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from rest_framework.validators import UniqueValidator
@@ -49,10 +49,22 @@ class DepositSerializer(serializers.ModelSerializer):
         model = Deposit
         fields = ('__all__')
 
+class TransferSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transfer
+        fields = ('__all__')
+        
+    def validate(self, attrs):
+        if attrs['debit'] == attrs['credit']:
+            raise serializers.ValidationError(
+              {"You cant transfer to same account"})
+        return attrs
 
 class AccountSerializer(serializers.ModelSerializer):
     withdraw_account = WithdrawSerializer(many=True, read_only = True)
     deposit_account = DepositSerializer(many=True, read_only = True)
+    debit_account = TransferSerializer(many=True, read_only = True)
+    credit_account = TransferSerializer(many=True, read_only = True)
     class Meta:
         model = Account
         fields = ('__all__')

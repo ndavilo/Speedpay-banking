@@ -1,5 +1,5 @@
-from .models import Customer, Account, Withdraw, Deposit
-from .serializers import RegisterSerializer, CustomerSerializer, AccountSerializer, WithdrawSerializer, DepositSerializer
+from .models import Customer, Account, Withdraw, Deposit, Transfer
+from .serializers import RegisterSerializer, CustomerSerializer, AccountSerializer, WithdrawSerializer, DepositSerializer, TransferSerializer
 from rest_framework import viewsets, mixins
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status
@@ -18,7 +18,7 @@ def sample_view(request):
 class RegisterUserAPIView(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
-    #permission_classes = (IsAdminUser,)
+    permission_classes = (IsAdminUser,)
 
 
 class CustomerView(viewsets.ModelViewSet):
@@ -45,7 +45,7 @@ class WithdrawView(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['amount']
     search_fields = ['amount']
-    permission_classes = (IsAuthenticated,)
+    #permission_classes = (IsAuthenticated,)
 
 
 class DepositView(viewsets.ModelViewSet):
@@ -54,7 +54,15 @@ class DepositView(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['amount']
     search_fields = ['amount']
-    permission_classes = (IsAuthenticated,)
+    #permission_classes = (IsAuthenticated,)
+
+class TransferView(viewsets.ModelViewSet):
+    queryset = Transfer.objects.all()
+    serializer_class = TransferSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['amount', 'debit', 'credit']
+    search_fields = ['amount', 'debit', 'credit']
+    #permission_classes = (IsAuthenticated,)
 
 
     
