@@ -9,8 +9,8 @@ class Customer(models.Model):
     first_name      = models.CharField(max_length=100)
     middle_name     = models.CharField(max_length=100, null=True, blank=True)
     last_name       = models.CharField(max_length=100)
-    phone_number    = models.CharField(max_length=15)
-    email           = models.EmailField()
+    phone_number    = models.CharField(max_length=15, unique=True)
+    email           = models.EmailField(unique=True)
     address         = models.CharField(max_length=200)
     photo           = models.ImageField(null=True, blank=True)
 
@@ -20,7 +20,7 @@ class Customer(models.Model):
 #one customer can have two account numbers
 class Account(models.Model):
     customer =      models.ForeignKey(Customer, related_name='customer', null=True, on_delete=models.CASCADE)
-    account_number =models.CharField(max_length=12)
+    account_number =models.CharField(max_length=12, unique=True)
     account_type =  models.CharField(max_length=10)
     amount =        models.FloatField()
     date =      models.DateTimeField(blank=True, null=True, auto_now_add=True)
