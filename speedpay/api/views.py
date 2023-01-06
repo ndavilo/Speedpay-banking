@@ -3,7 +3,7 @@ from .serializers import RegisterSerializer, CustomerSerializer, AccountSerializ
 from rest_framework import viewsets, mixins
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.contrib.auth.models import User
 from urllib import request
 from rest_framework.response import Response
@@ -15,22 +15,12 @@ def sample_view(request):
 
 
 #Class based view to register user
-class RegisterUserAPIView(viewsets.GenericViewSet,mixins.CreateModelMixin,):
+class RegisterUserAPIView(viewsets.GenericViewSet,mixins.CreateModelMixin):
     queryset = User.objects.all()
-    permission_classes = (AllowAny,)
     serializer_class = RegisterSerializer
 
-    def create(self,request):
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-class ViewUserAPIView(viewsets.GenericViewSet,mixins.CreateModelMixin,):
-    queryset = User.objects.all()
-    permission_classes = (AllowAny,)
-    serializer_class = RegisterSerializer
-
+    def post(self, request):
+        return self.create(request)
 
 
 class CustomerView(viewsets.ModelViewSet):
