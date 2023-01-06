@@ -36,28 +36,50 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
-     
+
+ #To validate transfer amount with the current balance     
+def validateAccount(id, amount):
+  account = Account.objects.get(id=id)
+  if float(account.amount) < float(amount):
+    return True
+  else:
+    return False
 
 class WithdrawSerializer(serializers.ModelSerializer):
     class Meta:
         model = Withdraw
         fields = ('__all__')
+    
+    def validate(self, attrs):
+      id = attrs['account'].id
+      if validateAccount(id, attrs['amount']):
+        raise serializers.ValidationError(
+            {"insuficent balance"})
+
+      return attrs
 
 
 class DepositSerializer(serializers.ModelSerializer):
     class Meta:
         model = Deposit
         fields = ('__all__')
+    
 
 class TransferSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transfer
         fields = ('__all__')
-        
+
     def validate(self, attrs):
         if attrs['debit'] == attrs['credit']:
             raise serializers.ValidationError(
               {"You cant transfer to same account"})
+
+        id = attrs['debit'].id
+        if validateAccount(id, attrs['amount']):
+          raise serializers.ValidationError(
+              {"insuficent balance"})
+
         return attrs
 
 class AccountSerializer(serializers.ModelSerializer):
