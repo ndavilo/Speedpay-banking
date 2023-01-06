@@ -4,6 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from django.conf import settings
+from random import randint
 
 class Customer(models.Model):
     first_name      = models.CharField(max_length=100)
@@ -19,12 +20,24 @@ class Customer(models.Model):
 
 #one customer can have two account numbers
 class Account(models.Model):
-    customer =      models.ForeignKey(Customer, related_name='customer', null=True, on_delete=models.CASCADE)
-    account_number =models.CharField(max_length=12, unique=True)
-    account_type =  models.CharField(max_length=10)
-    amount =        models.FloatField()
-    date =      models.DateTimeField(blank=True, null=True, auto_now_add=True)
-    tansaction_key =models.IntegerField()
+    customer        = models.ForeignKey(Customer, related_name='customer', null=True, on_delete=models.CASCADE)
+    account_type    = models.CharField(max_length=10)
+    amount          = models.FloatField()
+    date            = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    tansaction_key  = models.IntegerField()
+    id              = models.IntegerField(primary_key=True, editable=False)
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            # if create new tree
+            is_id_exist = True
+            while is_id_exist:
+                id = randint(20000000000, 30000000000)
+                is_id_exist = Account.objects.filter(id=id).exists()
+                
+            self.id = id
+
+        super().save(*args, **kwargs)
 
 class Withdraw(models.Model):
     amount =    models.FloatField()

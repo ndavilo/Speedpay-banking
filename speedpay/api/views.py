@@ -15,12 +15,10 @@ def sample_view(request):
 
 
 #Class based view to register user
-class RegisterUserAPIView(viewsets.GenericViewSet,mixins.CreateModelMixin):
+class RegisterUserAPIView(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
-
-    def post(self, request):
-        return self.create(request)
+    #permission_classes = (IsAdminUser,)
 
 
 class CustomerView(viewsets.ModelViewSet):
@@ -29,16 +27,16 @@ class CustomerView(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_fields = ['id', 'phone_number', 'email', 'last_name']
     search_fields = ['id', 'phone_number', 'email', 'last_name']
-    permission_classes = (IsAuthenticated,)
+    #permission_classes = (IsAuthenticated,)
 
 
 class AccountView(viewsets.ModelViewSet):
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    filterset_fields = ['account_number']
-    search_fields = ['account_number']
-    permission_classes = (IsAuthenticated,)
+    filterset_fields = ['id']
+    search_fields = ['id']
+    #permission_classes = (IsAuthenticated,)
 
 
 class WithdrawView(viewsets.ModelViewSet):
