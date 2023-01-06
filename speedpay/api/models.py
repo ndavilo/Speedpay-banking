@@ -26,6 +26,7 @@ class Account(models.Model):
     date            = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     tansaction_key  = models.IntegerField()
     id              = models.IntegerField(primary_key=True, editable=False)
+    flag            = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if not self.id:

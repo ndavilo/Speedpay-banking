@@ -56,6 +56,9 @@ class WithdrawSerializer(serializers.ModelSerializer):
         raise serializers.ValidationError(
             {"insuficent balance"})
 
+      if Account.objects.get(id=id).flag:
+          raise serializers.ValidationError(
+              {"Go to the bank"})
       return attrs
 
 
@@ -80,6 +83,10 @@ class TransferSerializer(serializers.ModelSerializer):
           raise serializers.ValidationError(
               {"insuficent balance"})
 
+        if Account.objects.get(id=id).flag:
+            raise serializers.ValidationError(
+              {"Go to the bank"})
+              
         return attrs
 
 class AccountSerializer(serializers.ModelSerializer):
