@@ -6,7 +6,7 @@ from rest_framework import filters, status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.contrib.auth.models import User
 from rest_framework.response import Response
-from rest_framework import generics
+from rest_framework.decorators import api_view
 
 
 
@@ -115,13 +115,12 @@ class DepositView(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateM
     search_fields = ['amount']
     #permission_classes = (IsAuthenticated,)
 
-class TransferView(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
+class TransferView(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
     """
         Only Authenticated users are allowed.
 
         Only perform the following:
 
-            * List all the transfers,
             * Create new transfer,
             * Retrieve transfer,
         
@@ -136,4 +135,19 @@ class TransferView(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Create
     #permission_classes = (IsAuthenticated,)
 
 
-    
+# Testing.
+@api_view(['GET', 'POST'])
+def customer_list(request):
+
+    if request.method == 'GET':
+        customer = Customer.objects.all()
+        serializer = CustomerSerializer(customer,many=True)
+
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serializer = CustomerSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

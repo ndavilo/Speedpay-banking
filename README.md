@@ -5,17 +5,21 @@ This API code allows the frontend access to Customer Account, Withdraw, Deposit 
 
 Open speedpay file to access the API
 
-You will be allowed to create user using http://127.0.0.1:8000/register
-Automatically AUTH TOKEN will be generated which can be viewed with http://127.0.0.1:8000/api-token-auth
+You will be allowed to create user using endpoint/register
+Automatically AUTH TOKEN will be generated which can be viewed with endpoint/api-token-auth
 Other fuctions can be performed with the following endpoints
 {
-    "customer": "http://127.0.0.1:8000/customer/",
-    "account": "http://127.0.0.1:8000/account/",
-    "withdraw": "http://127.0.0.1:8000/withdraw/",
-    "deposit": "http://127.0.0.1:8000/deposit/"
+    "customer": "endpoint/customer/",
+    "account": "endpoint/account/",
+    "withdraw": "endpoint/withdraw/",
+    "deposit": "endpoint/deposit/",
+    "register": "endpoint/register/",
+    "transfer": "endpoint/transfer/"
 }
 
-documentation: https://chukwunonsos-organization.gitbook.io/untitled/
+documentation: 
+endpoint/docs/
+https://chukwunonsos-organization.gitbook.io/untitled/
 
 Yet to be implimented:
 1. Account number should be unique
