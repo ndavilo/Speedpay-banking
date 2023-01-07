@@ -5,23 +5,46 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.contrib.auth.models import User
-from urllib import request
 from rest_framework.response import Response
+from rest_framework import generics
 
-
-def sample_view(request):
-    current_user = request.user
-    print (current_user.id)
 
 
 #Class based view to register user
 class RegisterUserAPIView(viewsets.ModelViewSet):
+    """
+    Only Admin users are allowed.
+
+    Only perform the following:
+
+        * List all the users,
+        * Create new user,
+        * Retrieve user,
+        * Update user details,
+        * Delete user
+
+    Documentation: 'endpoint/docs/'
+
+    """
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
     permission_classes = (IsAdminUser,)
 
 
-class CustomerView(viewsets.ModelViewSet):
+class CustomerView(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin):
+    """
+        Only Authenticated users are allowed.
+
+        Only perform the following:
+
+            * List all the customers,
+            * Create new customers,
+            * Retrieve one customer,
+            * Update customer details
+
+        Documentation: 'endpoint/docs/'
+    
+    """
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
@@ -30,7 +53,19 @@ class CustomerView(viewsets.ModelViewSet):
     #permission_classes = (IsAuthenticated,)
 
 
-class AccountView(viewsets.ModelViewSet):
+class AccountView(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
+    """
+        Only Authenticated users are allowed.
+
+        Only perform the following:
+
+            * List all the accounts,
+            * Create new account,
+            * Retrieve account,
+        
+        Documentation: 'endpoint/docs/'
+    
+    """
     queryset = Account.objects.all()
     serializer_class = AccountSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
@@ -39,7 +74,19 @@ class AccountView(viewsets.ModelViewSet):
     #permission_classes = (IsAuthenticated,)
 
 
-class WithdrawView(viewsets.ModelViewSet):
+class WithdrawView(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
+    """
+        Only Authenticated users are allowed.
+
+        Only perform the following:
+
+            * List all the withdrawals,
+            * Create new withdrawal,
+            * Retrieve withdrawal,
+        
+        Documentation: 'endpoint/docs/'
+    
+    """
     queryset = Withdraw.objects.all()
     serializer_class = WithdrawSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
@@ -48,7 +95,19 @@ class WithdrawView(viewsets.ModelViewSet):
     #permission_classes = (IsAuthenticated,)
 
 
-class DepositView(viewsets.ModelViewSet):
+class DepositView(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
+    """
+        Only Authenticated users are allowed.
+
+        Only perform the following:
+
+            * List all the deposits,
+            * Create new deposit,
+            * Retrieve deposit,
+        
+        Documentation: 'endpoint/docs/'
+    
+    """
     queryset = Deposit.objects.all()
     serializer_class = DepositSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
@@ -56,7 +115,19 @@ class DepositView(viewsets.ModelViewSet):
     search_fields = ['amount']
     #permission_classes = (IsAuthenticated,)
 
-class TransferView(viewsets.ModelViewSet):
+class TransferView(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
+    """
+        Only Authenticated users are allowed.
+
+        Only perform the following:
+
+            * List all the transfers,
+            * Create new transfer,
+            * Retrieve transfer,
+        
+        Documentation: 'endpoint/docs/'
+    
+    """
     queryset = Transfer.objects.all()
     serializer_class = TransferSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
