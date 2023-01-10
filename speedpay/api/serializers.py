@@ -86,7 +86,7 @@ class TransferSerializer(serializers.ModelSerializer):
         if Account.objects.get(id=id).flag:
             raise serializers.ValidationError(
               {"Go to the bank"})
-              
+
         return attrs
 
 class AccountSerializer(serializers.ModelSerializer):
@@ -97,8 +97,7 @@ class AccountSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
         fields = ('__all__')
-   
-
+        
 class CustomerSerializer(serializers.ModelSerializer):
     customer = AccountSerializer(many=True, read_only = True)
     class Meta:
