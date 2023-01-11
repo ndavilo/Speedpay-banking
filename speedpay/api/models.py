@@ -117,32 +117,4 @@ def createAuthToken(sender, instance, created, **kwargs):
         Token.objects.create(user=instance)
 
 
-@receiver(post_save, sender=Withdraw)
-def create_product(sender, instance, created, **kwargs):
-    amount = instance.amount
-    id = instance.account.id
-    account = Account.objects.get(id=id)
-    account.amount = account.amount - amount
-    account.save()
 
-
-@receiver(post_save, sender=Deposit)
-def create_product(sender, instance, created, **kwargs):
-    amount = instance.amount
-    id = instance.account.id
-    account = Account.objects.get(id=id)
-    account.amount = account.amount + amount
-    account.save()
-
-
-@receiver(post_save, sender=Transfer)
-def create_product(sender, instance, created, **kwargs):
-    amount = instance.amount
-    debit_id = instance.debit.id
-    credit_id = instance.credit.id
-    credit_account = Account.objects.get(id=credit_id)
-    credit_account.amount = credit_account.amount + amount
-    credit_account.save()
-    debit_account = Account.objects.get(id=debit_id)
-    debit_account.amount = debit_account.amount - amount
-    debit_account.save()
