@@ -6,7 +6,6 @@ from rest_framework import filters, status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.contrib.auth.models import User
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
@@ -149,6 +148,11 @@ def user_authentication(request):
             * Check username,
             * Check password
             * Retrieve Token and User if both username and password is currect,
+            
+            when you catch the error, you can use: error.response.data.error 
+            to get the error message. 
+            
+            common errors are: Invalid User and Ivalid Password
 
         Documentation: 'endpoint/docs/'
 

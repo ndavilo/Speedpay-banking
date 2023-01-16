@@ -19,6 +19,7 @@ Other fuctions can be performed with the following endpoints
 
 documentation: 
 endpoint/docs/
+http://nonsodavilo.pythonanywhere.com/docs/
 https://chukwunonsos-organization.gitbook.io/untitled/
 
 Yet to be implimented:
