@@ -5,6 +5,11 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.contrib.auth.models import User
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import authenticate
 
 
 # Class based view to register user
@@ -132,3 +137,37 @@ class TransferView(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.Retr
     filterset_fields = ['amount', 'debit', 'credit']
     search_fields = ['amount', 'debit', 'credit']
     # permission_classes = (IsAuthenticated,)
+      
+        
+@api_view(["POST"])
+def user_authentication(request):
+    """
+        All users are allowed.
+
+        Only perform the following:
+
+            * Check username,
+            * Check password
+            * Retrieve Token and User if both username and password is currect,
+
+        Documentation: 'endpoint/docs/'
+
+    """
+    username = request.data.get("username")
+    password = request.data.get("password")
+
+    if username is None or password is None:
+        return Response({'detail': 'Please provide both username and password'})
+    else:
+        try:
+            user=User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response({'detail': 'UserName Invalid Credentials'}, status=status.HTTP_404_NOT_FOUND)
+        
+        pwd_valid = authenticate(username=username, password=password)
+        if pwd_valid:
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({'token': token.key,
+                             'user': username}, status=status.HTTP_200_OK)
+        else:
+            return Response({'detail': 'Password Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
