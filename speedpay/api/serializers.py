@@ -1,4 +1,4 @@
-from .models import AppToken, AppUser, Customer, Account, Withdraw, Deposit, Transfer
+from .models import AppOTP, AppUser, AppUserToken, Customer, Account, Withdraw, Deposit, Transfer
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from rest_framework.validators import UniqueValidator
@@ -154,9 +154,15 @@ class CustomerSerializer(serializers.ModelSerializer):
         fields = ('__all__')
  
  
-class AppTokenSerializer(serializers.ModelSerializer):
+class AppOTPSerializer(serializers.ModelSerializer):
     class Meta:
-        model = AppToken
+        model = AppOTP
+        fields = ('__all__')
+        
+        
+class AppUserTokenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AppUserToken
         fields = ('__all__')
 
                
@@ -167,7 +173,9 @@ class AppUserSerializer(serializers.ModelSerializer):
         
     def validate(self, attrs):
         account_id = attrs['account']
-        appToken = AppToken.objects.create(account = account_id)
+        appOTP = AppOTP.objects.create(account = account_id)
+        appOTP.save()
+        appToken = AppUserToken.objects.create(account = account_id)
         appToken.save()
         
         return attrs

@@ -208,17 +208,17 @@ class AppUser(models.Model):
         varified    = models.BooleanField(default=False)
 
     """
-    account     = models.ForeignKey(Account, related_name='app_account', on_delete=models.CASCADE, unique=True) 
+    account     = models.OneToOneField(Account, related_name='app_account', on_delete=models.CASCADE, unique=True) 
     password    = models.CharField(max_length=100)
     varified    = models.BooleanField(default=False)
 
  
     
-class AppToken(models.Model):
+class AppOTP(models.Model):
     id          = models.IntegerField(primary_key=True, editable=False)
     dateTime    = models.DateTimeField(auto_now_add=True)
     closed      = models.BooleanField(default=False)
-    account     = models.ForeignKey(Account, related_name='token_account', on_delete=models.CASCADE) 
+    account     = models.ForeignKey(Account, related_name='otp_account', on_delete=models.CASCADE) 
 
     def save(self, *args, **kwargs):
         """
@@ -230,7 +230,24 @@ class AppToken(models.Model):
             is_id_exist = True
             while is_id_exist:
                 id = randint(100000, 1000000)
-                is_id_exist = AppToken.objects.filter(id=id).exists()
+                is_id_exist = AppOTP.objects.filter(id=id).exists()
+
+            self.id = id
+
+        super().save(*args, **kwargs)
+ 
+        
+class AppUserToken(models.Model):
+    id          = models.CharField(primary_key=True, editable=False, max_length=32)
+    dateTime    = models.DateTimeField(auto_now_add=True)
+    account     = models.OneToOneField(Account, related_name='token_account', on_delete=models.CASCADE) 
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            is_id_exist = True
+            while is_id_exist:
+                id = secrets.token_hex(16)
+                is_id_exist = AppUserToken.objects.filter(id=id).exists()
 
             self.id = id
 
