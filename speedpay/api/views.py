@@ -44,6 +44,21 @@ class CustomerView(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Create
             * Retrieve one customer,
             * Update customer details
 
+        A model representing a customer.
+
+        Fields:
+        first_name (CharField): First name of the customer.
+        middle_name (CharField): Middle name of the customer, can be blank.
+        last_name (CharField): Last name of the customer.
+        phone_number (CharField): Phone number of the customer, unique.
+        email (EmailField): Email of the customer, unique.
+        address (CharField): Address of the customer.
+        photo (ImageField): Profile photo of the customer, can be blank.
+        deleted (BooleanField): Indicates if the customer has been deleted.
+
+        Methods:
+        str: Returns the email of the customer as a string representation.
+        
         Documentation: 'endpoint/docs/'
 
     """
@@ -65,6 +80,16 @@ class AccountView(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateM
             * Create new account,
             * Retrieve account,
             * Update account details
+            
+        Required Fields:
+        
+            customer (ForeignKey): The customer who owns the account.
+            account_type (CharField): The type of the account.
+            amount (FloatField): The current balance of the account.
+            tansaction_key (IntegerField): A unique identifier for each transaction.
+            id (IntegerField): A unique identifier for the account, automatically generated upon creation.
+            flag (BooleanField, default is False): A flag for account status.
+            closed (BooleanField, default is False): Indicates whether the account has been closed or not.
 
         Documentation: 'endpoint/docs/'
 
@@ -79,16 +104,20 @@ class AccountView(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateM
 
 class WithdrawView(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
     """
-        Only Authenticated users are allowed.
+    Only authenticated users are allowed.
 
-        Only perform the following:
+    API endpoint that allows to:
+        * List all withdraws,
+        * Create a new withdraw,
+        * Retrieve details of a withdraw.
+        
+    Required Fields:
+    amount (float): The amount of the withdraw.
+    account (ForeignKey): The account associated with this withdraw transaction.
 
-            * List all the withdrawals,
-            * Create new withdrawal,
-            * Retrieve withdrawal,
+    Documentation: endpoint/docs/
 
-        Documentation: 'endpoint/docs/'
-
+    Filter the list of withdraws by `amount` and search for withdraw by `amount`.
     """
     queryset = Withdraw.objects.all()
     serializer_class = WithdrawSerializer
@@ -108,6 +137,10 @@ class DepositView(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateM
             * Create new deposit,
             * Retrieve deposit,
 
+        Required Fields:
+        amount (float): The amount of the deposit.
+        account (ForeignKey): The account associated with this deposit transaction.
+        
         Documentation: 'endpoint/docs/'
 
     """
@@ -127,6 +160,11 @@ class TransferView(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.Retr
 
             * Create new transfer,
             * Retrieve transfer,
+            
+        Required Fields:
+        debit (ForeignKey): The account the transfer will be debited from.
+        credit (ForeignKey): The account the transfer will be credited to.
+        amount (float): The amount of the transfer.
 
         Documentation: 'endpoint/docs/'
 
@@ -142,21 +180,19 @@ class TransferView(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.Retr
 @api_view(["POST"])
 def user_authentication(request):
     """
-        All users are allowed.
+    Verify user credentials and return token and username if verified.
 
-        Only perform the following:
+    Args:
+        request (dict):
+            username (str): User's username.
+            password (str): User's password.
 
-            * Check username,
-            * Check password
-            * Retrieve Token and User if both username and password is currect,
-
-            when you catch the error, you can use: error.response.data.error 
-            to get the error message. 
-
-            common errors are: Invalid User and Ivalid Password
-
-        Documentation: 'endpoint/docs/'
-
+    Returns:
+        JSON response:
+            {'detail': 'Please provide both username and password'}: If either `username` or `password` is missing.
+            {'detail': 'UserName Invalid Credentials'}: If the provided `username` is not found.
+            {'detail': 'Password Invalid Credentials'}: If the provided `password` is incorrect.
+            {'token': token.key, 'user': username}: If the user's credentials are valid.
     """
     username = request.data.get("username")
     password = request.data.get("password")
@@ -185,6 +221,9 @@ class CreateAppUserView(viewsets.GenericViewSet, mixins.CreateModelMixin):
     """
         All users with account number are allowed to register.
         after registration an OTP will be sent to your account's email for final verification
+        
+        Required Fields:
+
 
         Documentation: 'endpoint/docs/'
 
@@ -195,12 +234,19 @@ class CreateAppUserView(viewsets.GenericViewSet, mixins.CreateModelMixin):
 @api_view(["POST"])
 def app_Authentication(request):
     """
-        For verification of account,
-        account= request.data.get("account")
-        token = request.data.get("token")
-        User is required to provide account and token sent to his email account or vist the bank
-        Documentation: 'endpoint/docs/'
+    Verify user credentials and return account and customer information if verified.
 
+    Args:
+        request (dict):
+            account (str): ID of the user's account.
+            token (str): User's token.
+
+    Returns:
+        JSON response:
+            {'detail': 'Please provide account and token'}: If either `account` or `token` is missing.
+            {'detail': 'Invalid token'}: If the provided `token` is not found.
+            {'detail': 'User already verified'}: If the account has already been verified.
+            {'detail': 'App token verified'}: If the user's credentials are valid and the token is verified.
     """
     input_account= request.data.get("account")
     token = request.data.get("token")
@@ -227,58 +273,73 @@ def app_Authentication(request):
             return Response({'detail': 'Invalid account'}, status=status.HTTP_404_NOT_FOUND)
       
 
-@api_view(['GET'])
+@api_view(['POST'])
 def app_user_login_authentication(request):
-    """_summary_
-        View User account, which when verified will return all the customer's accounts  and details 
-        Documentation: 'endpoint/docs/'
+    """
+    Authenticate an app user and return relevant details.
 
     Args:
-        request (_type_): 
-            account= request.data.get("account")
-            input_password = request.data.get("password")
+        request (HttpRequest): The request object. It should contain the following data:
+            - account: ID of the account to be authenticated
+            - password: password of the app user
 
     Returns:
-        ({'detail': 'Please provide both account and password'}),
-        ({'detail': 'Invalid Account'},status=status.HTTP_404_NOT_FOUND),
-        ({'detail': 'Verify this account or visit bank'}, status=status.HTTP_401_UNAUTHORIZED),
-        
+        Response object:
+            - If account or password is missing: {'detail': 'Please provide both account and password'}
+            - If account is invalid: {'detail': 'Invalid Account'}, status=404
+            - If account is not verified: {'detail': 'Verify this account or visit bank'}, status=401
+            - If app user doesn't exist: {'detail': 'Invalid App User, Please Register'}, status=404
+            - If password is incorrect: {'detail': 'Invalid Password'}, status=401
+            - If successful: {'token': app_token.id, 'account': account, 'customer': serializer.data}, status=200
     """
-    input_account= request.data.get("account")
+    # code for authentication
+    input_account = request.data.get("account")
     input_password = request.data.get("password")
-    
+
     if input_account is None or input_password is None:
         return Response({'detail': 'Please provide both account and password'})
-    try: 
+    
+    try:
         account = Account.objects.get(id=input_account).id
     except Account.DoesNotExist:
-        return Response({'detail': 'Invalid Account'},status=status.HTTP_404_NOT_FOUND)
-    
-    try:          
+        return Response({'detail': 'Invalid Account'}, status=status.HTTP_404_NOT_FOUND)
+
+    try:
         app_account = AppUser.objects.get(account=account)
-        
+
         if app_account.varified is False:
             return Response({'detail': 'Verify this account or visit bank'}, status=status.HTTP_401_UNAUTHORIZED)
-        
+
         if app_account.password != input_password:
             return Response({'detail': 'Invalid Password'}, status=status.HTTP_401_UNAUTHORIZED)
-        
+
     except AppUser.DoesNotExist:
-        return Response({'detail': 'Invalid App User, Please Register'},status=status.HTTP_404_NOT_FOUND)
-        
-    if request.method == 'GET':
+        return Response({'detail': 'Invalid App User, Please Register'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'POST':
         app_token = AppUserToken.objects.get(account=account)
-        return Response({'token': app_token.id}, status=status.HTTP_200_OK)
+        account_array = Account.objects.get(id=account)
+        customer_id = account_array.customer
+        customer = Customer.objects.get(email=customer_id)
+        serializer = CustomerSerializer(customer)
+        return Response({'token': app_token.id, 'account': account, 'customer': serializer.data},
+                        status=status.HTTP_200_OK)
+
+
+
 
 def isAuthorizedUser(input_token):
-    """_summary_
-
-    Args:
-        input_token (_type_): the token collected from the header
-
-    Returns:
-        _type_: dictionary: with status(True or False) and Message
     """
+        Check if the provided token is a valid token for an authorized app user
+
+        Args:
+        input_token (str): Token to be verified
+
+        Returns:
+        dict: A dictionary with two keys, 'status' (bool) indicating if the token is valid, and 'message' (str)
+        containing either the account object or error message.
+
+        """
     try: 
         token = AppUserToken.objects.get(id=input_token)
         account_id = token.account.id
@@ -293,13 +354,20 @@ def isAuthorizedUser(input_token):
 @api_view(['GET'])
 def app_Account_View(request):
     """
-        Customer account view:
-        
-        requirement: app token
-        
-        which when verified will return all the customer's accounts  and details 
-    
-        Documentation: 'endpoint/docs/'
+    Retrieve customer's account information.
+    Requires a valid app token in the request header. Returns all the customer's accounts and their details if the app token is verified. 
+
+    - Request header:
+        Authorization: <app_token>
+
+    - Response:
+        If successful, returns a JSON object with the customer's account information.
+        If the app token is not provided, returns a JSON object with a detail message "Please provide token".
+        If the app token is invalid, returns a JSON object with a detail message "Invalid Token".
+        If the account is not verified, returns a JSON object with a detail message "Verify this account or visit bank".
+        If the app user is not found, returns a JSON object with a detail message "Invalid App User, Please Register".
+
+    - Documentation: 'endpoint/docs/'
 
     """
     input_token = request.headers.get('Authorization')

@@ -10,18 +10,21 @@ import secrets
 
 
 class Customer(models.Model):
-    
     """
-        This model is used to create customers on the database.
-        first_name is a CharField with 100 as max
-        middle_name is a CharField with 100 as max
-        last_name is a CharField with 100 as max
-        phone_number is a CharField with 15 as max with is unique
-        email is email field with is unique 
-        address is a CharField with 200 as max
-        photo is an image field with can be left empty
-        deleted is used to track deleted users which is set as false in default mode
+        A model representing a customer.
 
+        Fields:
+        first_name (CharField): First name of the customer.
+        middle_name (CharField): Middle name of the customer, can be blank.
+        last_name (CharField): Last name of the customer.
+        phone_number (CharField): Phone number of the customer, unique.
+        email (EmailField): Email of the customer, unique.
+        address (CharField): Address of the customer.
+        photo (ImageField): Profile photo of the customer, can be blank.
+        deleted (BooleanField): Indicates if the customer has been deleted.
+
+        Methods:
+        str: Returns the email of the customer as a string representation.
     """
     
     first_name = models.CharField(max_length=100)
@@ -40,20 +43,23 @@ class Customer(models.Model):
 
 
 class Account(models.Model):
-    
     """
-        This model is used to create accounts on the database.
-        customer = models.ForeignKey(
-        Customer, related_name='customer', null=True, on_delete=models.CASCADE)
-        account_type = models.CharField(max_length=10)
-        amount = models.FloatField()
-        date = models.DateTimeField(blank=True, null=True, auto_now_add=True)
-        tansaction_key = models.IntegerField()
-        id = models.IntegerField(primary_key=True, editable=False)
-        flag = models.BooleanField(default=False)
-        closed = models.BooleanField(default=False)
+    This model represents a bank account belonging to a customer.
 
+    Attributes:
+        customer (ForeignKey): The customer who owns the account.
+        account_type (CharField): The type of the account.
+        amount (FloatField): The current balance of the account.
+        date (DateTimeField): The date and time the account was created.
+        tansaction_key (IntegerField): A unique identifier for each transaction.
+        id (IntegerField): A unique identifier for the account, automatically generated upon creation.
+        flag (BooleanField): A flag for account status.
+        closed (BooleanField): Indicates whether the account has been closed or not.
+
+    Methods:
+        save(self, *args, **kwargs): Override the save method to automatically generate a unique id for the account.
     """
+    
     customer = models.ForeignKey(
         Customer, related_name='customer', null=True, on_delete=models.CASCADE)
     account_type = models.CharField(max_length=10)
@@ -66,7 +72,14 @@ class Account(models.Model):
 
     def save(self, *args, **kwargs):
         """
-        This is used to create unique account numbers from randint(20000000000, 30000000000)
+        Override the save method to automatically generate a unique id for the account.
+
+        Args:
+            *args: Any additional arguments to pass to the superclass.
+            **kwargs: Any additional keyword arguments to pass to the superclass.
+
+        Returns:
+            None
 
         """
         if not self.id:
@@ -83,13 +96,17 @@ class Account(models.Model):
 
 class Withdraw(models.Model):
     """
-        This model is used to create withdraws on the database.
-        amount = models.FloatField()
-        date = models.DateTimeField(blank=True, null=True, auto_now_add=True)
-        account = models.ForeignKey(
-            Account, related_name='withdraw_account', on_delete=models.CASCADE)
-        id = models.CharField(primary_key=True, editable=False, max_length=32)
-
+    Model for Withdraw transactions. 
+    
+    This class represents a withdraw transaction in the system. It contains information about the amount of the
+    withdraw, the date and time of the transaction, and the related account. 
+    
+    Attributes:
+        amount (float): The amount of the withdraw.
+        date (datetime): The date and time of the transaction.
+        account (ForeignKey): The account associated with this withdraw transaction.
+        id (CharField): A unique identifier for the transaction.
+    
     """
     amount = models.FloatField()
     date = models.DateTimeField(blank=True, null=True, auto_now_add=True)
@@ -98,6 +115,12 @@ class Withdraw(models.Model):
     id = models.CharField(primary_key=True, editable=False, max_length=32)
 
     def save(self, *args, **kwargs):
+        """
+        Overrides the default save method to assign a unique id to the transaction if it's a new one.
+        
+        The method generates a unique identifier for the transaction using the `secrets` library and assigns it 
+        to the `id` field. It then calls the parent class's `save` method to persist the changes.
+        """
         if not self.id:
             # if create new tree
             is_id_exist = True
@@ -112,21 +135,28 @@ class Withdraw(models.Model):
 
 class Deposit(models.Model):
     """
-        This model is used to create deposits on the database.
-        amount = models.FloatField()
-        date = models.DateTimeField(blank=True, null=True, auto_now_add=True)
-        account = models.ForeignKey(
-            Account, related_name='deposit_account', on_delete=models.CASCADE)
-        id = models.CharField(primary_key=True, editable=False, max_length=32)
-
+    Model for Deposit transactions.
+    
+    Attributes:
+        amount (float): The amount of the deposit.
+        date (datetime): The date and time of the transaction.
+        account (ForeignKey): The account associated with this deposit transaction.
+        id (CharField): A unique identifier for the transaction.
     """
     amount = models.FloatField()
     date = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     account = models.ForeignKey(
-        Account, related_name='deposit_account', on_delete=models.CASCADE)
+        Account, related_name='deposit_account', on_delete=models.CASCADE,
+        verbose_name='Account', help_text='The account associated with this deposit transaction.')
     id = models.CharField(primary_key=True, editable=False, max_length=32)
 
     def save(self, *args, **kwargs):
+        """
+        Overrides the default save method to assign a unique id to the transaction if it's a new one.
+        
+        The method generates a unique identifier for the transaction using the `secrets` library and assigns it 
+        to the `id` field. It then calls the parent class's `save` method to persist the changes.
+        """
         if not self.id:
             # if create new tree
             is_id_exist = True
@@ -139,42 +169,28 @@ class Deposit(models.Model):
         super().save(*args, **kwargs)
 
 
+
 class Transfer(models.Model):
     """
-        This model is used to create transfers on the database.
-        debit = models.ForeignKey(
-            Account, 
-            related_name='debit_account', 
-            on_delete=models.CASCADE
-            )
-        credit = models.ForeignKey(
-            Account, 
-            related_name='credit_account', 
-            on_delete=models.CASCADE
-            )
-        amount = models.FloatField()
-        date = models.DateTimeField(
-            blank=True, 
-            null=True, 
-            auto_now_add=True
-            )
-        id = models.CharField(
-            primary_key=True, 
-            editable=False, 
-            max_length=32
-            )
-
+    Model for Transfer transactions.
+    
+    Attributes:
+        debit (ForeignKey): The account the transfer will be debited from.
+        credit (ForeignKey): The account the transfer will be credited to.
+        amount (float): The amount of the transfer.
+        date (datetime): The date and time of the transaction.
+        id (CharField): A unique identifier for the transaction.
     """
     debit = models.ForeignKey(
         Account, 
         related_name='debit_account', 
-        on_delete=models.CASCADE
-        )
+        on_delete=models.CASCADE,
+        verbose_name='Debit Account', help_text='The account the transfer will be debited from.')
     credit = models.ForeignKey(
         Account, 
         related_name='credit_account', 
-        on_delete=models.CASCADE
-        )
+        on_delete=models.CASCADE,
+        verbose_name='Credit Account', help_text='The account the transfer will be credited to.')
     amount = models.FloatField()
     date = models.DateTimeField(
         blank=True, 
@@ -188,6 +204,12 @@ class Transfer(models.Model):
         )
 
     def save(self, *args, **kwargs):
+        """
+        Overrides the default save method to assign a unique id to the transaction if it's a new one.
+        
+        The method generates a unique identifier for the transaction using the `secrets` library and assigns it 
+        to the `id` field. It then calls the parent class's `save` method to persist the changes.
+        """
         if not self.id:
             # if create new tree
             is_id_exist = True
@@ -198,32 +220,56 @@ class Transfer(models.Model):
             self.id = id
 
         super().save(*args, **kwargs)
+
             
 
 class AppUser(models.Model):
     """
-        This model is used to create app users on the database.
-        account     = models.ForeignKey(Account, related_name='app_account', on_delete=models.CASCADE) 
-        password    = models.CharField(max_length=100)
-        varified    = models.BooleanField(default=False)
-
+    A model that represents an App User with One to One relation to `Account` model.
+    
+    Attributes:
+        account (models.OneToOneField): A One to One relationship field with `Account` model.
+        password (models.CharField): A character field that stores password of the user.
+        varified (models.BooleanField): A boolean field that indicates whether the user is verified or not.
+        
     """
-    account     = models.OneToOneField(Account, related_name='app_account', on_delete=models.CASCADE, unique=True) 
-    password    = models.CharField(max_length=100)
-    varified    = models.BooleanField(default=False)
+    account = models.OneToOneField(
+        Account, 
+        related_name='app_account', 
+        on_delete=models.CASCADE, 
+        unique=True
+        ) 
+    password = models.CharField(max_length=100)
+    varified = models.BooleanField(default=False)
 
  
     
 class AppOTP(models.Model):
-    id          = models.IntegerField(primary_key=True, editable=False)
-    dateTime    = models.DateTimeField(auto_now_add=True)
-    closed      = models.BooleanField(default=False)
-    account     = models.ForeignKey(Account, related_name='otp_account', on_delete=models.CASCADE) 
+    """
+    A Django model representing OTP generated for a user for a secure session.
+    Model representing an OTP for a user account
+
+    Attributes:
+        id (int): Unique identifier for the OTP
+        dateTime (datetime): Timestamp when the OTP was created
+        closed (bool): Indicates if the OTP has been closed or not
+        account (ForeignKey): Account associated with the OTP
+    """
+    id = models.IntegerField(primary_key=True, editable=False)
+    dateTime = models.DateTimeField(auto_now_add=True)
+    closed = models.BooleanField(default=False)
+    account = models.ForeignKey(Account, related_name='otp_account', on_delete=models.CASCADE) 
 
     def save(self, *args, **kwargs):
         """
-        This is used to create unique account numbers from randint(100000, 1000000)
+        Save the instance to the database and generate a unique ID if it's a new instance.
+        Override the default save method to generate a unique identifier for the OTP if not provided.
+        Args:
+            *args: Additional arguments
+            **kwargs: Keyword arguments
 
+        Returns:
+            None
         """
         if not self.id:
             # if create new tree
@@ -235,14 +281,38 @@ class AppOTP(models.Model):
             self.id = id
 
         super().save(*args, **kwargs)
+
  
         
 class AppUserToken(models.Model):
-    id          = models.CharField(primary_key=True, editable=False, max_length=32)
-    dateTime    = models.DateTimeField(auto_now_add=True)
-    account     = models.OneToOneField(Account, related_name='token_account', on_delete=models.CASCADE) 
+    """
+    This model represents a token that is associated with an App User.
+
+    Fields:
+        id (CharField): Primary key and unique identifier for each token. Editable and max length is 32.
+        dateTime (DateTimeField): The date and time the token was created.
+        account (OneToOneField): One-to-one relationship with the `Account` model.
+
+    """
+    id = models.CharField(
+        primary_key=True, 
+        editable=False, 
+        max_length=32
+        )
+    dateTime = models.DateTimeField(
+        auto_now_add=True
+        )
+    account = models.OneToOneField(
+        Account, 
+        related_name='token_account', 
+        on_delete=models.CASCADE
+        ) 
 
     def save(self, *args, **kwargs):
+        """
+        This is used to create unique token ID's by using the `secrets.token_hex(16)` function.
+
+        """
         if not self.id:
             is_id_exist = True
             while is_id_exist:
@@ -252,16 +322,23 @@ class AppUserToken(models.Model):
             self.id = id
 
         super().save(*args, **kwargs)
+
     
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def createAuthToken(sender, instance, created, **kwargs):
     """
-        To create a token each time a user is created
+    This function creates a new `Token` object associated with `instance` every time a new `settings.AUTH_USER_MODEL` object is saved.
 
+    Args:
+        sender (class): The class that triggered the signal.
+        instance (object): The object that was saved.
+        created (bool): Whether the instance was created or updated.
+        **kwargs: Additional keyword arguments.
     """
     if created:
         Token.objects.create(user=instance)
+
 
 
 
