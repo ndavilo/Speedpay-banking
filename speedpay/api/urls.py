@@ -3,6 +3,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import RegisterUserAPIView, CustomerView, AccountView, WithdrawView, DepositView, TransferView
 from .views import user_authentication, CreateAppUserView, app_Authentication, app_Account_View, app_user_login_authentication
+from .views import POSCustomerCreateView, pos_customer_login
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework.documentation import include_docs_urls
 
@@ -14,6 +15,7 @@ router.register('deposit', DepositView)
 router.register('register', RegisterUserAPIView)
 router.register('transfer', TransferView)
 router.register('createAppUser', CreateAppUserView)
+router.register('createPOSUser', POSCustomerCreateView)
 
 
 urlpatterns = [
@@ -24,4 +26,5 @@ urlpatterns = [
     path('app_auth/', app_Authentication, name='app_auth'),
     path('app_home/', app_Account_View, name='app_home'),
     path('app_user_auth/', app_user_login_authentication, name='app_user_auth'),
+    path('pos_customer_login/', pos_customer_login, name='pos_customer_login'),
 ]

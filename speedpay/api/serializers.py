@@ -1,4 +1,5 @@
 from .models import AppOTP, AppUser, AppUserToken, Customer, Account, Withdraw, Deposit, Transfer
+from .models import POS_Customer
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from rest_framework.validators import UniqueValidator
@@ -179,3 +180,12 @@ class AppUserSerializer(serializers.ModelSerializer):
         appToken.save()
         
         return attrs
+
+
+class POSCustomerSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the POS_Customer model.
+    """
+    class Meta:
+        model = POS_Customer
+        fields = '__all__'

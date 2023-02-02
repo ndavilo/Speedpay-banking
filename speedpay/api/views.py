@@ -9,7 +9,10 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
-from rest_framework.decorators import action
+from .models import POS_Customer
+from .serializers import POSCustomerSerializer
+from django.contrib.auth.hashers import check_password
+from rest_framework_jwt.settings import api_settings
 
 
 # Class based view to register user
@@ -58,7 +61,7 @@ class CustomerView(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Create
 
         Methods:
         str: Returns the email of the customer as a string representation.
-        
+
         Documentation: 'endpoint/docs/'
 
     """
@@ -80,9 +83,9 @@ class AccountView(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateM
             * Create new account,
             * Retrieve account,
             * Update account details
-            
+
         Required Fields:
-        
+
             customer (ForeignKey): The customer who owns the account.
             account_type (CharField): The type of the account.
             amount (FloatField): The current balance of the account.
@@ -110,7 +113,7 @@ class WithdrawView(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Create
         * List all withdraws,
         * Create a new withdraw,
         * Retrieve details of a withdraw.
-        
+
     Required Fields:
     amount (float): The amount of the withdraw.
     account (ForeignKey): The account associated with this withdraw transaction.
@@ -140,7 +143,7 @@ class DepositView(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.CreateM
         Required Fields:
         amount (float): The amount of the deposit.
         account (ForeignKey): The account associated with this deposit transaction.
-        
+
         Documentation: 'endpoint/docs/'
 
     """
@@ -160,7 +163,7 @@ class TransferView(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.Retr
 
             * Create new transfer,
             * Retrieve transfer,
-            
+
         Required Fields:
         debit (ForeignKey): The account the transfer will be debited from.
         credit (ForeignKey): The account the transfer will be credited to.
@@ -214,14 +217,13 @@ def user_authentication(request):
             return Response({'detail': 'Password Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
-
-#APP USERS
+# APP USERS
 
 class CreateAppUserView(viewsets.GenericViewSet, mixins.CreateModelMixin):
     """
         All users with account number are allowed to register.
         after registration an OTP will be sent to your account's email for final verification
-        
+
         Required Fields:
 
 
@@ -230,7 +232,8 @@ class CreateAppUserView(viewsets.GenericViewSet, mixins.CreateModelMixin):
     """
     queryset = AppUser.objects.all()
     serializer_class = AppUserSerializer
- 
+
+
 @api_view(["POST"])
 def app_Authentication(request):
     """
@@ -248,30 +251,30 @@ def app_Authentication(request):
             {'detail': 'User already verified'}: If the account has already been verified.
             {'detail': 'App token verified'}: If the user's credentials are valid and the token is verified.
     """
-    input_account= request.data.get("account")
+    input_account = request.data.get("account")
     token = request.data.get("token")
-    if token is None :
+    if token is None:
         return Response({'detail': 'Please provide token'})
     else:
         try:
             token_acc = AppOTP.objects.get(id=token)
-            
+
         except AppOTP.DoesNotExist:
             return Response({'detail': 'Invalid token'}, status=status.HTTP_404_NOT_FOUND)
-        
+
         try:
             verify_account = AppUser.objects.get(account=input_account)
-            
+
             if verify_account.varified is True:
                 return Response({'detail': 'User already verified!'}, status=status.HTTP_406_NOT_ACCEPTABLE)
-            
+
             verify_account.varified = True
             verify_account.save()
             return Response({'detail': 'App token verified'}, status=status.HTTP_200_OK)
-            
+
         except AppUser.DoesNotExist:
             return Response({'detail': 'Invalid account'}, status=status.HTTP_404_NOT_FOUND)
-      
+
 
 @api_view(['POST'])
 def app_user_login_authentication(request):
@@ -298,7 +301,7 @@ def app_user_login_authentication(request):
 
     if input_account is None or input_password is None:
         return Response({'detail': 'Please provide both account and password'})
-    
+
     try:
         account = Account.objects.get(id=input_account).id
     except Account.DoesNotExist:
@@ -326,8 +329,6 @@ def app_user_login_authentication(request):
                         status=status.HTTP_200_OK)
 
 
-
-
 def isAuthorizedUser(input_token):
     """
         Check if the provided token is a valid token for an authorized app user
@@ -340,16 +341,16 @@ def isAuthorizedUser(input_token):
         containing either the account object or error message.
 
         """
-    try: 
+    try:
         token = AppUserToken.objects.get(id=input_token)
         account_id = token.account.id
         account = Account.objects.get(id=account_id)
-        
-        return {'status':True, 'message':account}
-    
+
+        return {'status': True, 'message': account}
+
     except AppUserToken.DoesNotExist:
-        return {'status':False, 'message':'Invalid Token'}
-    
+        return {'status': False, 'message': 'Invalid Token'}
+
 
 @api_view(['GET'])
 def app_Account_View(request):
@@ -371,31 +372,91 @@ def app_Account_View(request):
 
     """
     input_token = request.headers.get('Authorization')
-    
+
     if input_token is None:
         return Response({'detail': 'Please provide token'})
-    
+
     auth = isAuthorizedUser(input_token=input_token)
-    
+
     if auth['status'] is True:
         account_id = auth['message'].id
         account = Account.objects.get(id=account_id)
         customer_id = account.customer
         customer = Customer.objects.get(email=customer_id)
-    
+
     else:
-        return Response({'detail': 'Invalid Token'},status=status.HTTP_404_NOT_FOUND)
-    
-    try:          
+        return Response({'detail': 'Invalid Token'}, status=status.HTTP_404_NOT_FOUND)
+
+    try:
         app_account = AppUser.objects.get(account=account_id)
-        
+
         if app_account.varified is False:
             return Response({'detail': 'Verify this account or visit bank'}, status=status.HTTP_401_UNAUTHORIZED)
-    
-        
+
     except AppUser.DoesNotExist:
-        return Response({'detail': 'Invalid App User, Please Register'},status=status.HTTP_404_NOT_FOUND)
-        
+        return Response({'detail': 'Invalid App User, Please Register'}, status=status.HTTP_404_NOT_FOUND)
+
     if request.method == 'GET':
         serializer = CustomerSerializer(customer)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# POS
+class POSCustomerCreateView(viewsets.GenericViewSet, mixins.CreateModelMixin):
+    """
+    POST API endpoint to create a POS customer.
+    """
+    queryset = POS_Customer.objects.all()
+    serializer_class = POSCustomerSerializer
+
+
+jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+
+@api_view(['POST'])
+def pos_customer_login(request):
+    """
+    API endpoint for POS customer login.
+    The API verifies the account number and password provided by the customer and returns a JWT token along with the customer details and their accounts.
+
+    Args:
+        request (HttpRequest): The request object that contains the account number and password.
+
+    Returns:
+        JWT token (str): The JWT token assigned to the customer after successful verification.
+        customer details (dict): The details of the customer, including the full name, phone number, email, work address, bank name, NIN, BVN, profile picture, etc.
+        customer accounts (list): A list of the customer's accounts, including the account type, amount, transaction key, flag, and closed status.
+
+    Raises:
+        400 Bad Request: If the account number or password provided is incorrect.
+
+    """
+    account_number = request.data.get('account_number')
+    password = request.data.get('password')
+    customer = POS_Customer.objects.filter(accountNumber=account_number).first()
+    if customer and check_password(password, customer.password):
+        payload = jwt_payload_handler(customer)
+        token = jwt_encode_handler(payload)
+        customer_details = {
+            'fullName': customer.fullName,
+            'phoneNumber': customer.phoneNumber,
+            'email': customer.email,
+            'workAddress': customer.workAddress,
+            'bankName': customer.bankName,
+            'nin': customer.nin,
+            'bvn': customer.bvn,
+            'profilePicture': customer.profilePicture.url if customer.profilePicture else None
+        }
+        customer_accounts = [{
+            'account_type': account.account_type,
+            'amount': account.amount,
+            'transaction_key': account.transaction_key,
+            'flag': account.flag,
+            'closed': account.closed
+        } for account in customer.withdraw_account.all()]
+        return Response({
+            'token': token,
+            'customer_details': customer_details,
+            'customer_accounts': customer_accounts
+        }, status=status.HTTP_200_OK)
+    return Response({'error': 'Invalid account number or password'}, status=status.HTTP_400_BAD_REQUEST)

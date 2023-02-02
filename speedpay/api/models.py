@@ -6,7 +6,7 @@ from rest_framework.authtoken.models import Token
 from django.conf import settings
 from random import randint
 import secrets
-#from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password
 
 
 class Customer(models.Model):
@@ -33,7 +33,7 @@ class Customer(models.Model):
     phone_number = models.CharField(max_length=15, unique=True)
     email = models.EmailField(unique=True)
     address = models.CharField(max_length=200)
-    photo = models.ImageField(null=True, blank=True)
+    photo = models.ImageField(upload_to='profile_pictures/', null=True, blank=True)
     deleted = models.BooleanField(default=False)
 
     def __str__(self):
@@ -341,4 +341,47 @@ def createAuthToken(sender, instance, created, **kwargs):
 
 
 
+class POS_Customer(models.Model):
+    """
+    This model represents a customer in the system.
+
+    Attributes:
+        fullName (CharField): The full name of the customer.
+        phoneNumber (CharField): The phone number of the customer.
+        email (EmailField): The email of the customer.
+        workAddress (CharField): The work address of the customer.
+        accountNumber (ForeignKey): The account number of the customer, linked to the Account model.
+        bankName (CharField): The bank name of the customer.
+        nin (CharField): The NIN of the customer.
+        bvn (CharField): The BVN of the customer.
+        refereeFullName (CharField): The full name of the referee.
+        refereeAddress (CharField): The address of the referee.
+        refereeNIN (CharField): The NIN of the referee.
+        refereeBVN (CharField): The BVN of the referee.
+        refereeAccountNumber (CharField): The account number of the referee.
+        refereeBankName (CharField): The bank name of the referee.
+        profilePicture (ImageField): The profile picture of the customer.
+
+    """
+    fullName = models.CharField(max_length=255)
+    phoneNumber = models.CharField(max_length=255)
+    email = models.EmailField(max_length=255)
+    workAddress = models.CharField(max_length=255)
+    accountNumber = models.ForeignKey(
+        Account, related_name='pos_account', on_delete=models.CASCADE)
+    bankName = models.CharField(max_length=255)
+    nin = models.CharField(max_length=255)
+    bvn = models.CharField(max_length=255)
+    refereeFullName = models.CharField(max_length=255)
+    refereeAddress = models.CharField(max_length=255)
+    refereeNIN = models.CharField(max_length=255)
+    refereeBVN = models.CharField(max_length=255)
+    refereeAccountNumber = models.CharField(max_length=255)
+    refereeBankName = models.CharField(max_length=255)
+    profilePicture = models.ImageField(upload_to='pos_profile_pictures/', null=True, blank=True)
+    password = models.CharField(max_length=100)
+    
+    def save(self, *args, **kwargs):
+        self.password = make_password(self.password)
+        super().save(*args, **kwargs)
 
